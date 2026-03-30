@@ -7,16 +7,20 @@ on:
 
 jobs:
   clang-tidy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: sudo apt-get install -y clang-tidy cmake g++
+      - name: Install LLVM + Clang
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "17"
 
       - name: Configure
         run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
-        run: clang-tidy -p build $(git ls-files '*.cpp')
+        shell: bash
+        run: |
+          clang-tidy -p build $(git ls-files '*.cpp')
