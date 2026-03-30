@@ -2,11 +2,11 @@
 #define SUNAY_HPP
 
 #include <string>
+#include <vector>
 #include <memory>
 
 namespace Sunay {
 
-    // Represents the version of the Sunay engine
     struct Version {
         int major;
         int minor;
@@ -15,29 +15,29 @@ namespace Sunay {
         std::string toString() const;
     };
 
-    // Configuration options for initializing the engine
-    struct Config {
-        bool enableJavaScript = false;
-        bool enableCSS = true;
-        bool enableImages = true;
+    struct Tab {
+        std::string title;
+        std::string url;
+        bool active = false;
     };
 
-    // The main Sunay Engine class
+    struct BrowserUIState {
+        std::vector<Tab> tabs;
+        std::string addressBarText;
+        bool isLoading = false;
+    };
+
     class Engine {
     public:
-        // Create a new engine instance
-        static std::unique_ptr<Engine> create(const Config& config = Config());
+        static std::unique_ptr<Engine> create();
 
-        // Initialize internal subsystems
         virtual void initialize() = 0;
 
-        // Render a webpage from raw HTML
-        virtual std::string render(const std::string& html) = 0;
+        // Render the browser UI based on state
+        virtual std::string render(const BrowserUIState& state) = 0;
 
-        // Get engine version
         virtual Version getVersion() const = 0;
 
-        // Shutdown and cleanup
         virtual void shutdown() = 0;
 
         virtual ~Engine() = default;
