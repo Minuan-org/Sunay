@@ -1,4 +1,4 @@
-name: Sunay Lint
+name: Sunay Lint — Journey to Castle Clang
 
 on:
   pull_request:
@@ -10,20 +10,26 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # The Human begins the journey
+      - name: The Workflow Arrives in the Kingdom
+        uses: actions/checkout@v4
 
-      - name: Install LLVM + Clang
+      # The Human gathers the correct artifact
+      - name: Acquire the Sacred Artifact (Clang 19)
         uses: KyleMayes/install-llvm-action@v2
         with:
-          version: "17"
+          version: "19"
 
-      - name: Install Ninja
+      # The Human prepares tools for the journey
+      - name: Forge the Builder's Tool (Ninja)
         run: choco install ninja
 
-      - name: Configure
+      # The Human crafts the map needed to enter the castle
+      - name: Generate the Compilation Map (compile_commands.json)
         run: cmake -B build -S . -G "Ninja" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-      - name: Run clang-tidy
+      # The Human approaches the castle and is inspected by the Guard
+      - name: Approach Castle Clang (Run clang-tidy)
         shell: bash
         run: |
           clang-tidy -p build $(git ls-files '*.cpp')
