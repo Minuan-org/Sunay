@@ -1,9 +1,9 @@
-#ifndef SUNAY_HPP
-#define SUNAY_HPP
+#pragma once
 
 #include <string>
 #include <vector>
 #include <memory>
+#include <windows.h>
 
 namespace Sunay {
 
@@ -31,18 +31,16 @@ namespace Sunay {
     public:
         static std::unique_ptr<Engine> create();
 
-        virtual void initialize() = 0;
+        // Attach to the native browser window
+        virtual void initialize(HWND hwnd) = 0;
 
-        // Render the browser UI based on state
-        virtual std::string render(const BrowserUIState& state) = 0;
+        // Render the browser chrome (not the website)
+        virtual void render(const BrowserUIState& state) = 0;
 
         virtual Version getVersion() const = 0;
-
         virtual void shutdown() = 0;
 
         virtual ~Engine() = default;
     };
 
 }
-
-#endif
