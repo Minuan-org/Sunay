@@ -31,10 +31,7 @@ namespace Sunay {
     public:
         static std::unique_ptr<Engine> create();
 
-        // Attach to the native browser window
         virtual void initialize(HWND hwnd) = 0;
-
-        // Render the browser chrome (not the website)
         virtual void render(const BrowserUIState& state) = 0;
 
         virtual Version getVersion() const = 0;
