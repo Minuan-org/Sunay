@@ -17,8 +17,11 @@ jobs:
         with:
           version: "17"
 
+      - name: Install Ninja
+        run: choco install ninja
+
       - name: Configure
-        run: cmake -B build -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        run: cmake -B build -S . -G "Ninja" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
         shell: bash
