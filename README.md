@@ -13,17 +13,21 @@ Minuan remains responsible for browser policy, URL allowlisting, HTML6
 validation and HTML6-to-HTML conversion. Sunay accepts the processed
 document and displays it inside Minuan's page view.
 
-## Build
+## Build and test
 
 Requirements:
 - CMake 3.16 or newer
 - C++20 compiler
 - Qt 6 or Qt 5 with Core, Widgets and WebEngineWidgets
 
-Build standalone:
+Build and run the tests:
 
     cmake -S . -B build
     cmake --build build --config Release
+    ctest --test-dir build -C Release --output-on-failure
+
+The test suite checks the public rendering pipeline API, safe null-view
+behavior, default security options and settings changes.
 
 Or add Sunay to Minuan with CMake FetchContent.
 

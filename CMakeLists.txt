@@ -12,6 +12,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_AUTOMOC ON)
 
 include(GNUInstallDirs)
+include(CTest)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED
     COMPONENTS Core Widgets WebEngineWidgets
@@ -54,6 +55,19 @@ if(MSVC)
     target_compile_options(Sunay PRIVATE /W4 /permissive-)
 else()
     target_compile_options(Sunay PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(SunayPipelineTests
+        tests/rendering_pipeline_test.cpp
+    )
+    target_link_libraries(SunayPipelineTests PRIVATE Sunay::Sunay)
+    if(MSVC)
+        target_compile_options(SunayPipelineTests PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(SunayPipelineTests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME SunayRenderingPipeline COMMAND SunayPipelineTests)
 endif()
 
 message(STATUS "Configuring Sunay ${PROJECT_VERSION}")
