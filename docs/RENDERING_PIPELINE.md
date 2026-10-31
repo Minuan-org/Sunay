@@ -49,6 +49,14 @@ Local content access to remote URLs is disabled by default. Minuan must
 validate top-level navigation against its configured allowed-site list.
 The renderer does not replace browser navigation policy.
 
+## Tests
+
+The CTest suite checks:
+- Null view attachment and safe no-op operations.
+- Default JavaScript, image and local-to-remote access settings.
+- Updating and reading back renderer options.
+- The renderer remains non-copyable.
+
 ## Implementation boundary
 
 This version uses Qt WebEngine/Chromium for HTML, CSS, JavaScript, layout,

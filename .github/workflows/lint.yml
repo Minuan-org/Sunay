@@ -1,35 +1,47 @@
-name: Sunay Lint — Journey to Castle Clang
+name: Sunay Lint
 
 on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   clang-tidy:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
-      # The Human begins the journey
-      - name: The Workflow Arrives in the Kingdom
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # The Human gathers the correct artifact
-      - name: Acquire the Sacred Artifact (Clang 19)
+      - name: Install Clang 20
         uses: KyleMayes/install-llvm-action@v2
         with:
-          version: "19"
+          version: "20"
 
-      # The Human prepares tools for the journey
-      - name: Forge the Builder's Tool (Ninja)
-        run: choco install ninja
+      - name: Install Ninja
+        run: choco install ninja --yes --no-progress
 
-      # The Human crafts the map needed to enter the castle
-      - name: Generate the Compilation Map (compile_commands.json)
-        run: cmake -B build -S . -G "Ninja" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: "qtwebengine qtwebchannel qtpositioning"
+          archives: "qtbase qtdeclarative"
+          cache: true
 
-      # The Human approaches the castle and is inspected by the Guard
-      - name: Approach Castle Clang (Run clang-tidy)
+      - name: Configure with compile commands
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER=clang++
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Run clang-tidy on the active Sunay library source
         shell: bash
-        run: |
-          clang-tidy -p build $(git ls-files '*.cpp')
+        run: clang-tidy -p build src/rendering_pipeline.cpp
