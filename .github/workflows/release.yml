@@ -5,25 +5,61 @@ on:
     tags:
       - "v*.*.*"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to build and attach Windows assets to"
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
   build-release:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
-      - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: "qtwebengine"
+          archives: "qtbase qtwebchannel"
+          cache: true
 
       - name: Configure
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build build --config Release --parallel
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Install Sunay package
+        run: cmake --install build --config Release --prefix package
+
+      - name: Create Windows package
+        shell: pwsh
+        run: |
+          if (!(Test-Path "package/lib/Sunay.lib")) {
+            throw "Sunay.lib was not produced by the install step."
+          }
+          if (!(Test-Path "package/include/sunay/rendering_pipeline.hpp")) {
+            throw "The public Sunay header is missing from the install package."
+          }
+          Compress-Archive -Path "package/*" -DestinationPath "Sunay-Windows-x64.zip" -Force
+
+      - name: Attach package to GitHub Release
+        if: ${{ github.ref_type == 'tag' || inputs.tag != '' }}
+        uses: softprops/action-gh-release@v3
         with:
-          name: Sunay-Windows
-          path: build/Release
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: Sunay ${{ inputs.tag || github.ref_name }}
+          files: Sunay-Windows-x64.zip
+          fail_on_unmatched_files: true
