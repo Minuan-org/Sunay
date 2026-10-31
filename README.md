@@ -6,8 +6,8 @@ Minuan, not a separate browser application.
 ## Rendering backend
 
 Sunay embeds Qt WebEngine, which uses Chromium to provide HTML parsing,
-DOM construction, CSS parsing and layout, JavaScript execution, page
-painting, compositing, navigation and load-progress events.
+DOM construction, CSS parsing and layout, JavaScript execution, page painting,
+compositing, navigation and load-progress events.
 
 Minuan remains responsible for browser policy, URL allowlisting, HTML6
 validation and HTML6-to-HTML conversion. Sunay accepts the processed

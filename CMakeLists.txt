@@ -20,15 +20,12 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
     COMPONENTS Core Widgets WebEngineWidgets
 )
 
-set(SUNAY_PUBLIC_HEADERS
-    include/sunay/rendering_pipeline.hpp
-)
+set(SUNAY_PUBLIC_HEADERS include/sunay/rendering_pipeline.hpp)
 
 add_library(Sunay STATIC
     src/rendering_pipeline.cpp
     ${SUNAY_PUBLIC_HEADERS}
 )
-
 add_library(Sunay::Sunay ALIAS Sunay)
 
 set_target_properties(Sunay PROPERTIES
