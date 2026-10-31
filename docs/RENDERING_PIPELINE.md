@@ -1,34 +1,34 @@
 # Sunay Rendering Pipeline
 
-Sunay is Minuan's rendering component, not a separate browser or standalone application.
+Sunay is Minuan's rendering component, not a separate browser or standalone
+application.
 
-## Architecture
+## Responsibilities
 
-Minuan remains responsible for browser policy and document preparation:
-URL allowlisting, HTML6 validation, DOM processing, custom-tag conversion,
-and generation of the final document. Minuan then hands the processed
-document to Sunay.
+Minuan owns browser policy and document preparation: URL allowlisting,
+HTML6 validation, custom-tag conversion, history, tabs and navigation UI.
+Sunay owns the integration between Minuan's page area and Qt WebEngine.
 
-Sunay embeds Qt WebEngine's Chromium renderer in Minuan's page area.
-Chromium supplies the web-platform rendering stages:
+## Rendering stages
 
-1. **Document input** — Minuan supplies processed HTML and an optional base URL.
-2. **HTML parsing** — Chromium parses the document and constructs its DOM.
-3. **CSS processing** — stylesheets are loaded, parsed and resolved into computed styles.
-4. **Layout** — the renderer calculates element geometry and text flow.
-5. **Paint** — display commands are generated for visible content.
-6. **Compositing** — Chromium combines paint layers and presents the page.
-7. **Runtime** — JavaScript executes in the embedded page and can update the DOM.
+Sunay passes processed HTML and an optional base URL to Qt WebEngine.
+Chromium provides the browser rendering stages:
 
-Sunay exposes a C++ API around the renderer and forwards load progress,
-completion and URL-change events to Minuan.
+1. Document input — Minuan supplies processed HTML and a resource base URL.
+2. HTML parsing — Chromium parses the document and constructs its DOM.
+3. CSS processing — stylesheets are parsed and resolved into computed styles.
+4. Layout — element geometry and text flow are calculated.
+5. Paint — display commands are generated for visible content.
+6. Compositing — layers are combined and presented in the page view.
+7. JavaScript runtime — page scripts execute and may update the DOM.
 
-## Minuan integration
+Sunay forwards load-start, progress, completion and URL-change events to
+Minuan through its C++ API.
 
-Create a QWebEngineView in Minuan's page area and attach the pipeline:
+## API
 
     #include <QWebEngineView>
-    #include "sunay/rendering_pipeline.hpp"
+    #include <sunay/rendering_pipeline.hpp>
 
     auto* pageView = new QWebEngineView(parentWidget);
     auto* renderer = new Sunay::RenderingPipeline(pageView, parentWidget);
@@ -38,17 +38,21 @@ Create a QWebEngineView in Minuan's page area and attach the pipeline:
     options.imagesEnabled = true;
     renderer->setOptions(options);
 
-    // Pass output from Minuan's HTML6/DOM processing stage:
-    renderer->renderHtml(QString::fromStdString(processedHtml), baseUrl);
+    renderer->renderHtml(processedHtml, baseUrl);
 
-For normal navigation, call renderer->navigate(url). Connect
-renderingStarted, loadProgressChanged, and renderingFinished to Minuan's
-loading indicator and navigation state.
+For navigation, call renderer->navigate(url). Call renderer->stop() to stop
+the active load. The view is owned by Minuan; Sunay does not own it.
+
+## Security boundary
+
+Local content access to remote URLs is disabled by default. Minuan must
+validate top-level navigation against its configured allowed-site list.
+The renderer does not replace browser navigation policy.
 
 ## Implementation boundary
 
-This initial pipeline uses Qt WebEngine/Chromium for the web-standard parser,
-CSS engine, layout, JavaScript runtime, painting and compositing. Sunay does
-not yet contain a from-scratch HTML/CSS/JavaScript engine. Minuan's HTML6
-and CSS Next features must be translated or adapted before they are handed
-to Chromium until dedicated compatibility layers are implemented.
+This version uses Qt WebEngine/Chromium for HTML, CSS, JavaScript, layout,
+painting and compositing. It does not contain a custom rendering engine.
+Minuan's HTML6 and CSS Next syntax must be translated or adapted before it is
+handed to Chromium. JS-squared-specific runtime features are not implemented
+yet.
